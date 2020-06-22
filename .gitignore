@@ -1,0 +1,5 @@
+config.yaml
+*.pyc
+__pycache__
+venv
+.direnv
