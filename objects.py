@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import json
+import logging
 import sys
 
 def first_value(tag):
@@ -50,5 +51,6 @@ def fields(data):
 			r = extract(results)
 		except KeyError:
 			continue
-		v = transform(r)
-		yield (field, v, unit)
+		if r is not None:
+			v = transform(r)
+			yield (field, v, unit)
