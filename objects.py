@@ -42,6 +42,7 @@ sensors = [
 	('dc_current_a',			first_value('6380_40452100'),	scale(0.001), 'A'),
 	('dc_current_b',			second_value('6380_40452100'),	scale(0.001), 'A'),
 	('ac_total_yield',			first_value('6400_00260100'),	scale(3600.0), 'J'),
+	('ac_daily_yield',			first_value('6400_00262200'),	scale(3600.0), 'J'),
 ]
 
 def fields(data):
