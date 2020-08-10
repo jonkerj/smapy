@@ -40,7 +40,7 @@ class Submitter(object):
 		while True:
 			t0 = time.time()
 			s.work()
-			nap = t0 + interval - time.time()
+			nap = t0 + self.config['interval'] - time.time()
 			self.log.debug(f'Sleeping {nap:.1f} seconds')
 			time.sleep(nap)
 	
@@ -58,7 +58,6 @@ if __name__ == '__main__':
 	with open(args.config, 'r') as f:
 		config = yaml.load(f)
 	
-	interval = int(config['interval'])
 	s = Submitter(config)
 
 	# register exit hook. Needed to not overflow sessions
