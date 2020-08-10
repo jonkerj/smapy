@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}
+  labels:
+    {{- include "smapy.labels" . | nindent 4 }}
+data:
+  {{- with .Values.config }}
+  config.yaml: |-
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
