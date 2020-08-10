@@ -1,4 +1,4 @@
-attr==0.3.1
+attrs==19.3.0
 influxdb==5.3.0
 requests==2.24.0
 PyYAML==5.3.1
