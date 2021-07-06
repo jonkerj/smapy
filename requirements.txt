@@ -1,4 +1,4 @@
-attrs==19.3.0
+attrs==21.2.0
 environ-config==21.2.0
 influxdb-client[ciso]==1.18.0
-requests==2.24.0
+requests==2.25.1
