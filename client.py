@@ -15,17 +15,15 @@ class UnexpectedResponse(SMAError):
 
 @attr.s
 class SMAClient(object):
-	url = attr.ib()
-	group = attr.ib()
-	password = attr.ib()
+	config = attr.ib()
+	log = attr.ib(converter=lambda l: l.getChild('client'))
 	session = attr.ib(default=None)
 
 	def __attrs_post_init__(self):
-		self.log = logging.getLogger('client')
 		urllib3.disable_warnings() # SMA uses self-signed certs, no point in warning
 	
 	def rest(self, uri, params, data):
-		url = urllib.parse.urljoin(self.url, uri)
+		url = urllib.parse.urljoin(self.config.url, uri)
 		p = data.copy()
 		if self.session:
 			p['sid'] = self.session
@@ -43,8 +41,8 @@ class SMAClient(object):
 	def login(self):
 		self.log.debug('Logging in')
 		data = {
-			'right': self.group,
-			'pass': self.password,
+			'right': self.config.group,
+			'pass': self.config.password,
 		}
 		r = self.rest('/dyn/login.json', params={}, data=data)
 		if not 'result' in r:

@@ -4,37 +4,63 @@ import datetime
 import logging
 import os
 import os.path
+import sys
 import time
 
 import attr
-import client
-import influxdb
-import objects
+import environ
+from influxdb_client import InfluxDBClient, Point
+from influxdb_client.client.write_api import SYNCHRONOUS
 import yaml
+
+import objects
+import client
 
 def now():
 	zone = datetime.datetime.now(datetime.timezone.utc).astimezone()
 	return datetime.datetime.now().replace(tzinfo=zone.tzinfo)
 
+def convLoglevel(s):
+	levels = ['CRITICAL', 'FATAL', 'ERROR', 'WARNING', 'WARN', 'INFO', 'DEBUG']
+	if not s in levels:
+		raise ValueError(f'{s} is not a valid log level. Valid are {"".join(choices)}')
+	return s
+
+@environ.config(prefix="SMAPY")
+class Config:
+	url = environ.var()
+	group = environ.var('usr')
+	password = environ.var('sun1sgr3at')
+	interval = environ.var(30, converter=int)
+	loglevel = environ.var("INFO", converter=convLoglevel)
+	influxdb_bucket = environ.var('solar', name='INFLUXDB_V2_BUCKET')
+
 @attr.s
 class Submitter(object):
 	config = attr.ib()
+	log = attr.ib(converter=lambda l: l.getChild('submitter'))
+	sma = attr.ib()
 
 	def __attrs_post_init__(self):
-		self.log = logging.getLogger('submitter')
-		self.influx = influxdb.InfluxDBClient(**self.config['influxdb'])
-		self.sma = client.SMAClient(**self.config['sma'])
+		self.log = logging.getLogger('smapy.submitter')
+
+		self.influx_client = InfluxDBClient.from_env_properties()
+		self.influx_write_api = self.influx_client.write_api(write_options=SYNCHRONOUS)
 		self.sma.login()
 	
 	def work(self):
 		self.log.info('Polling and submitting')
 		t = now()
 		data = self.sma.read()
-		fields = {field: value for field, value, unit in objects.fields(data) if value is not None}
-		self.log.debug(f'Result: {fields}')
-		self.influx.write_points(
-			tags=config['tags'], 
-			points=[{'measurement': 'sma', 'time': t, 'fields': fields}]
+		p = Point('sma').time(t)
+		for field, value, unit in objects.fields(data):
+			if value is not None:
+				p.field(field, value)
+		self.log.debug(f'Result: {p.to_line_protocol()}')
+
+		self.influx_write_api.write(
+			bucket = self.config.influxdb_bucket,
+			record = p,
 		)
 	
 	def loop(self):
@@ -42,7 +68,7 @@ class Submitter(object):
 		while True:
 			t0 = time.time()
 			s.work()
-			nap = t0 + self.config['interval'] - time.time()
+			nap = t0 + self.config.interval - time.time()
 			self.log.debug(f'Sleeping {nap:.1f} seconds')
 			time.sleep(nap)
 	
@@ -51,31 +77,15 @@ class Submitter(object):
 		self.sma.logout()
 
 if __name__ == '__main__':
-	parser = argparse.ArgumentParser(description="Submit SMA Webconnect to InfluxDB")
-	parser.add_argument("--config", dest='config', help='Config YAML', default='/config/config.yaml')
-	parser.add_argument("--secrets", dest='secrets', help='Dir holding secrets', default='/secrets/')
-	parser.add_argument("--debug", dest='level', action='store_const', help='Enable debug logging', const=logging.DEBUG, default=logging.INFO)
-	args = parser.parse_args()
+	config = Config.from_environ()
+	ch = logging.StreamHandler(sys.stderr)
+	ch.setFormatter(logging.Formatter("%(asctime)s %(levelname)8s:%(name)s: %(message)s"))
+	log = logging.getLogger('smapy')
+	log.addHandler(ch)
+	log.setLevel(config.loglevel)
 
-	logging.basicConfig(level=args.level)
-	with open(args.config, 'r') as f:
-		config = yaml.load(f)
-	
-	assert os.path.exists(args.secrets), f'secrets dir ({args.secrets}) does not exist'
-	assert os.path.isdir(args.secrets), f'secrets path ({args.secrets}) is not a directory'
-
-	# merge secret values (eg: influxdb.connection.username) into config hash
-	for key in os.listdir(args.secrets):
-		if key.startswith('..'):
-			continue
-		logger.debug(f'merging {key}')
-		parts = key.split('.')
-		current = config
-		for k in parts[:-1]:
-			current = current[k]
-		current[parts[-1]] = open(os.path.join(args.secrets, key), 'r').read().strip()
-
-	s = Submitter(config)
+	sma = client.SMAClient(config, log)
+	s = Submitter(config, log, sma)
 
 	# register exit hook. Needed to not overflow sessions
 	@atexit.register
