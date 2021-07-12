@@ -2,6 +2,7 @@ FROM python:3.8-alpine as base
 
 # Build
 FROM base as builder
+RUN apk add build-base
 RUN python -m venv /venv
 ENV PATH="/venv/bin:$PATH"
 COPY requirements.txt /venv
