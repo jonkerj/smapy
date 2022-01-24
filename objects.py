@@ -24,17 +24,30 @@ def scale(factor):
 sensors = [
 	('ac_power',				first_value('6100_40263F00'),	scale(1.0), 'W'),
 	('ac_active_power_l1',			first_value('6100_40464000'),	scale(1.0), 'W'),
+	('ac_active_power_l2',			first_value('6100_40464100'),	scale(1.0), 'W'),
+	('ac_active_power_l3',			first_value('6100_40464200'),	scale(1.0), 'W'),
 	('ac_phase_voltage_l1',			first_value('6100_00464800'),	scale(0.01), 'V'),
+	('ac_phase_voltage_l2',			first_value('6100_00464900'),	scale(0.01), 'V'),
+	('ac_phase_voltage_l3',			first_value('6100_00464A00'),	scale(0.01), 'V'),
+	('ac_phase_voltage_l1_l2',		first_value('6100_00464B00'),	scale(0.01), 'V'),
+	('ac_phase_voltage_l2_l3',		first_value('6100_00464C00'),	scale(0.01), 'V'),
+	('ac_phase_voltage_l3_l1',		first_value('6100_00464D00'),	scale(0.01), 'V'),
 	('ac_phase_current_l1',			first_value('6100_40465300'),	scale(0.001), 'A'),
+	('ac_phase_current_l2',			first_value('6100_40465400'),	scale(0.001), 'A'),
+	('ac_phase_current_l3',			first_value('6100_40465500'),	scale(0.001), 'A'),
 	('ac_grid_frequency',			first_value('6100_00465700'),	scale(0.01), 'Hz'),
 	('ac_pv_generated_power',		first_value('6100_0046C200'),	scale(1.0), 'W'),
 	('ac_phase_total_current',		first_value('6100_00664F00'),	scale(0.001), 'A'),
-	('ac_displacement_power_factor',	first_value('6100_00665900'),	scale(0.001), ''), # heb ik die?
-	('ac_eei_displacement_power_factor',	first_value('6100_40665B00'),	scale(0.001), ''), # heb ik die?
-	('ac_reactive_power',			first_value('6100_40665F00'),	scale(1.0), 'VAR'), # heb ik die?
-	('ac_reactive_power_l1',		first_value('6100_40666000'),	scale(1.0), 'VAR'), # heb ik die?
-	('ac_apparent_power',			first_value('6100_40666700'),	scale(1.0), 'VA'), # heb ik die?
-	('ac_apparent_power_l1',		first_value('6100_40666800'),	scale(1.0), 'VA'), # heb ik die?
+	('ac_displacement_power_factor',	first_value('6100_00665900'),	scale(0.001), ''),
+	('ac_eei_displacement_power_factor',	first_value('6100_40665B00'),	scale(0.001), ''),
+	('ac_reactive_power',			first_value('6100_40665F00'),	scale(1.0), 'VAR'),
+	('ac_reactive_power_l1',		first_value('6100_40666000'),	scale(1.0), 'VAR'),
+	('ac_reactive_power_l2',		first_value('6100_40666100'),	scale(1.0), 'VAR'),
+	('ac_reactive_power_l3',		first_value('6100_40666200'),	scale(1.0), 'VAR'),
+	('ac_apparent_power',			first_value('6100_40666700'),	scale(1.0), 'VA'),
+	('ac_apparent_power_l1',		first_value('6100_40666800'),	scale(1.0), 'VA'),
+	('ac_apparent_power_l2',		first_value('6100_40666900'),	scale(1.0), 'VA'),
+	('ac_apparent_power_l3',		first_value('6100_40666A00'),	scale(1.0), 'VA'),
 	('dc_power_a',				first_value('6380_40251E00'),	scale(1.0), 'W'),
 	('dc_power_b',				second_value('6380_40251E00'),	scale(1.0), 'W'),
 	('dc_voltage_a',			first_value('6380_40451F00'),	scale(0.01), 'V'),
