@@ -1,5 +1,5 @@
 attrs==21.2.0
 environ-config==21.2.0
 influxdb-client[ciso]==1.18.0
-requests==2.25.1
+requests==2.31.0
 PyYAML==5.4.1
